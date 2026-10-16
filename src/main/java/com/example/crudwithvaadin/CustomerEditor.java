@@ -51,8 +51,15 @@ public class CustomerEditor extends VerticalLayout implements KeyNotifier {
 
 		add(firstName, lastName, actions);
 
-		// bind using naming convention
-		binder.bindInstanceFields(this);
+		// bind fields and require a non-blank value for both names
+		binder.forField(firstName)
+				.asRequired("First name is required")
+				.withValidator(value -> !value.isBlank(), "First name is required")
+				.bind(Customer::getFirstName, Customer::setFirstName);
+		binder.forField(lastName)
+				.asRequired("Last name is required")
+				.withValidator(value -> !value.isBlank(), "Last name is required")
+				.bind(Customer::getLastName, Customer::setLastName);
 
 		// Configure and style components
 		setSpacing(true);
@@ -75,6 +82,10 @@ public class CustomerEditor extends VerticalLayout implements KeyNotifier {
 	}
 
 	void save() {
+		// don't persist invalid input; the fields show the validation errors
+		if (!binder.validate().isOk()) {
+			return;
+		}
 		repository.save(customer);
 		changeHandler.onChange();
 	}
