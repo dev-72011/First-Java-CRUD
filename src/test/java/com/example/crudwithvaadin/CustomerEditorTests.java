@@ -1,6 +1,8 @@
 package com.example.crudwithvaadin;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.never;
 import static org.mockito.BDDMockito.then;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -37,6 +39,28 @@ public class CustomerEditorTests {
 		this.editor.save();
 
 		then(this.customerRepository).should().save(argThat(customerMatchesEditorFields()));
+	}
+
+	@Test
+	public void shouldNotStoreCustomerWhenNamesAreEmpty() {
+		emptyCustomerWasSetToForm();
+
+		this.editor.save();
+
+		then(this.customerRepository).should(never()).save(any());
+		then(this.changeHandler).should(never()).onChange();
+	}
+
+	@Test
+	public void shouldNotStoreCustomerWhenNameIsBlank() {
+		emptyCustomerWasSetToForm();
+
+		this.editor.firstName.setValue("   ");
+		this.editor.lastName.setValue(LAST_NAME);
+
+		this.editor.save();
+
+		then(this.customerRepository).should(never()).save(any());
 	}
 
 	@Test
